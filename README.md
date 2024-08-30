@@ -51,7 +51,7 @@ python Video_Strawberry_Screenshot.py
 ├── save_pic/
 │   ├── 0000 
 │       ├── 0000_L2_2_Unripe_1_329frame.jpg
-		├── 0000_L2_2_Unripe_1_330frame.jpg
+│	├── 0000_L2_2_Unripe_1_330frame.jpg
 │
 │   ├── 0001         
 │   ├── 0002                    
@@ -142,7 +142,7 @@ python train.py --gpu_ids 0 --name ft_ResNet50 --train_all --batchsize 32  --dat
 torch._dynamo.exc.BackendCompilerFailed: backend='inductor' raised:
 FileNotFoundError: [Errno 2] No such file or directory: '/tmp/torchinductor_xplv/triton/0/74f71ae78b2cfff6e4d076cf61bcb2f4/triton_.llir.tmp.pid_3793576_144376'
 ```
-将该代码复制到train.py中
+将该代码复制到train.py的开头中
 
 ```
  import torch._dynamo
@@ -151,7 +151,7 @@ FileNotFoundError: [Errno 2] No such file or directory: '/tmp/torchinductor_xplv
 
 ### 四、测试
 
-这一部分, 我们载入我们刚刚训练的模型来抽取每张图片的视觉特征，特征向量会存储在[Strawberry_ReID_baseline_pytorch]文件夹下的Pytorch_result.mat中
+这一部分, 我们载入我们刚刚训练的模型来抽取每张图片的视觉特征，特征向量（[1,512]）会存储在[Strawberry_ReID_baseline_pytorch]文件夹下的Pytorch_result.mat中
 
 ```
 python test.py --gpu_ids 0 --name ft_ResNet50 --test_dir your_data_path  --batchsize 32 --which_epoch 060
@@ -175,6 +175,8 @@ python test.py --gpu_ids 0 --name ft_ResNet50 --test_dir your_data_path  --batch
 python evaluate_gpu.py
 ```
 
+运行后会得到一个result文件
+
 ### 六、可视化程序
 
 测试单个query，可输入以下命令
@@ -183,13 +185,17 @@ python evaluate_gpu.py
 python demo.py --query_index 9 --save_path /home/xplv/fenghao_2/test
 ```
 
---query_index ` which query you want to test. You may select a number in the range of `0 ~ 287
+`--query_index` which query you want to test. You may select a number in the range of 0 ~ 287
 
---save_path `your save path`
+`--save_path`  your save path
 
 注：287是测试集ID的数量
 
 原理：对于选择的query，利用之前存在Pytorch_result.mat的特征向量到gallery中搜索匹配
+
+运行结果示例
+
+![demo](./images/demo.png)
 
 ## Other tools
 
@@ -219,17 +225,23 @@ python Index_method_similarity_between_adjacent_frames.py --save_path /home/xplv
 
 1、图像分辨率分布图
 
+![w_h](./images/w_h.jpeg)
+
 ```
 python width_height_img.py
 ```
 
 2、中心点坐标分布图
 
+![x_y](./images/x_y.jpeg)
+
 ```
 python center_coordinate.py
 ```
 
 3、矩形框概览
+
+![bboxes](./images/bboxes.jpeg)
 
 ```
 python Draw_rectangular_box.py
