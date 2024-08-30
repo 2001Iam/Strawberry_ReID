@@ -175,7 +175,9 @@ python test.py --gpu_ids 0 --name ft_ResNet50 --test_dir your_data_path  --batch
 python evaluate_gpu.py
 ```
 
-运行后会得到一个result文件
+运行后会得到一个result结果
+
+multi Rank@1:0.000000 Rank@5:0.000000 Rank@10:0.020000 mAP:0.002434
 
 ### 六、可视化程序
 
@@ -210,13 +212,13 @@ python demo_batch.py --save_path /home/xplv/fenghao_2/test
 ### 二、同ID下相邻帧的相似度计算
 
 #### 1、非指数法（计算相邻帧图像的余弦距离）
-
+![near](./images/near.png)
 ```
 python Calcuation_of_similarity_between_adjacent_frames.py --save_path /home/xplv/fenghao_2/test
 ```
 
 #### 2、指数法
-
+![near](./images/near_fun.png)
 ```
 python Index_method_similarity_between_adjacent_frames.py --save_path /home/xplv/fenghao_2/test
 ```
