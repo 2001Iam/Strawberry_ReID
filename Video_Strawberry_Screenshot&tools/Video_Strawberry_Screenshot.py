@@ -7,14 +7,14 @@ import glob
 import os
 
 
-path = r'*.mp4'
+path = r'L1_2.mp4'
 
 files = glob.iglob(path)
 count = -1
 for file in files:
     mp = {}
-    pre = file[0:2]
-    input_file = pre + "_2.txt"
+    pre = file[:-4]
+    input_file = pre + ".txt"
     cap = cv.VideoCapture(file)
     # timef = 75
     while cap.isOpened():

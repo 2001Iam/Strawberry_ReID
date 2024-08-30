@@ -51,10 +51,11 @@ def get_score2(hf, qf, gf):
 
 flag = 1
 history = []
-for j in range(6000):
+for j in range(200):
     parser = argparse.ArgumentParser(description='Demo')
     parser.add_argument('--gallery1_index', default=j, type=int, help='test_image_index')
     parser.add_argument('--test_dir', default='../Market/pytorch', type=str, help='./test_data')
+    parser.add_argument('--save_path', default='/home/xplv/fenghao/Index_Adjacent_frame_similarity', type=str, help='save path')
     opts = parser.parse_args()
 
     data_dir = opts.test_dir
@@ -117,6 +118,6 @@ for j in range(6000):
     else:
         k = 1
         flag = 1
-        save_path = f'/home/xplv/fenghao/Index_Adjacent_frame_similarity/{gallery1_label:04d}.png'
+        save_path = f'{opts.save_path}/{gallery1_label:04d}.png'
         fig.savefig(save_path)
         fig = plt.figure(figsize=(16, 16))

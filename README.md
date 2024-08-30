@@ -14,7 +14,30 @@
 
 ### 一、从标注视频中截取草莓图像（可跳过此步，Market为已经制作好的数据集，有兴趣的可尝试自己制作）
 
-在Video_Strawberry_Screenshot&tools文件夹下打开Terminal输入以下命令，可实现从标注好的视频中截取草莓图像（运行前请务必修改截取后草莓图像的保存位置）
+准备好相应的视频以及对应的txt文件，视频文件和txt文件的文件名务必保持相同，例如L1_2.mp4对应L1_2.txt，txt文件部分内容如下，其中每行以逗号分隔的7处代表的含义分别是frame（帧号）、class（标签类别）、class_num(标签类别编号)、x、y、w（宽）、h（高），（x，y）是bboxes左下角坐标
+
+```text
+21,Unripe_,1,1239,154,40,87
+22,Unripe_,1,1236,153,43,93
+23,Unripe_,1,1223,150,56,96
+24,Unripe_,1,1209,154,70,91
+25,Unripe_,1,1196,147,83,102
+26,Unripe_,1,1182,146,96,99
+27,Unripe_,1,1169,148,100,100
+28,Unripe_,1,1155,149,104,101
+29,Unripe_,1,1147,145,104,104
+30,Unripe_,1,1143,145,103,104
+31,Unripe_,1,1136,146,104,103
+32,Unripe_,1,1125,145,104,104
+33,Unripe_,1,1122,145,101,104
+34,Unripe_,1,1112,144,104,106
+35,Unripe_,1,1101,145,104,104
+35,Ripe4_,4,1229,424,50,160
+36,Unripe_,1,1096,146,100,102
+36,Ripe4_,4,1225,425,54,160
+```
+
+在Video_Strawberry_Screenshot&tools文件夹下打开Terminal输入以下命令，可实现从标注好的视频中截取草莓图像（运行前请务必将目标视频和对应的txt文件放入Video_Strawberry_Screenshot&tools文件夹下，并且修改截取后草莓图像的保存位置）
 
 ```
 python Video_Strawberry_Screenshot.py
@@ -36,11 +59,16 @@ python Video_Strawberry_Screenshot.py
 │   ├── 1106 
 ```
 
-0000~0553分配到train文件夹下
+①0000~0553分配到train文件夹下
 
-0554~1106分配到gallery文件夹下
+②0554~1106分配到gallery文件夹下
 
-运行以下代码的功能是实现将指定文件移动到指定文件夹下，可以帮助我们构建验证集val以及query
+③所有ID下图像数量小于10的全都移除
+
+④从train文件夹下每个ID中抽取第五张图像放到val文件夹中，从gallery文件夹下每个ID中拷贝第五张图像放到query文件夹中
+
+
+运行以下代码的功能是实现将指定文件移动到指定文件夹下，可以帮助我们构建验证集val以及测试集query
 
 ```python
 import os
@@ -69,7 +97,7 @@ for file in sorted_files:
             break
 ```
 
-这是最终的数据集格式
+这是最终的数据集格式，train是训练集，val是验证集，query和gallery是测试集
 
 ```text
 ├── Market/
@@ -88,7 +116,7 @@ for file in sorted_files:
 
 准备好数据集后，就可以开始训练了。
 
-我们可以输入如下命令开始训练：
+我们可以在[Strawberry_ReID_baseline_pytorch]文件夹下打开Terminal输入以下命令开始训练：
 
 ```
 python train.py --gpu_ids 0 --name ft_ResNet50 --train_all --batchsize 32  --data_dir your_data_path
@@ -106,9 +134,24 @@ python train.py --gpu_ids 0 --name ft_ResNet50 --train_all --batchsize 32  --dat
 
 `--erasing_p` random erasing probability
 
+
+
+若出现以下报错
+
+```
+torch._dynamo.exc.BackendCompilerFailed: backend='inductor' raised:
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/torchinductor_xplv/triton/0/74f71ae78b2cfff6e4d076cf61bcb2f4/triton_.llir.tmp.pid_3793576_144376'
+```
+将该代码复制到train.py中
+
+```
+ import torch._dynamo
+ torch._dynamo.config.suppress_errors = True
+```
+
 ### 四、测试
 
-这一部分, 我们载入我们刚刚训练的模型 来抽取每张图片的视觉特征
+这一部分, 我们载入我们刚刚训练的模型来抽取每张图片的视觉特征，特征向量会存储在[Strawberry_ReID_baseline_pytorch]文件夹下的Pytorch_result.mat中
 
 ```
 python test.py --gpu_ids 0 --name ft_ResNet50 --test_dir your_data_path  --batchsize 32 --which_epoch 060
@@ -126,7 +169,7 @@ python test.py --gpu_ids 0 --name ft_ResNet50 --test_dir your_data_path  --batch
 
 ### 五、评测
 
-是的，现在我们有了每张图片的特征。 我们需要做的事情只有用特征去匹配图像
+现在我们有了每张图片的特征，我们需要做的事情是用特征去匹配图像
 
 ```
 python evaluate_gpu.py
@@ -137,10 +180,16 @@ python evaluate_gpu.py
 测试单个query，可输入以下命令
 
 ```
-python demo.py --query_index 9
+python demo.py --query_index 9 --save_path /home/xplv/fenghao_2/test
 ```
 
 --query_index ` which query you want to test. You may select a number in the range of `0 ~ 287
+
+--save_path `your save path`
+
+注：287是测试集ID的数量
+
+原理：对于选择的query，利用之前存在Pytorch_result.mat的特征向量到gallery中搜索匹配
 
 ## Other tools
 
@@ -149,7 +198,7 @@ python demo.py --query_index 9
 在demo.py中每次只能测试一个query，运行下面命令可以实现query的批量测试，并且将测试结果保存到指定文件夹下
 
 ```
-python demo_batch.py
+python demo_batch.py --save_path /home/xplv/fenghao_2/test
 ```
 
 ### 二、同ID下相邻帧的相似度计算
@@ -157,20 +206,18 @@ python demo_batch.py
 #### 1、非指数法（计算相邻帧图像的余弦距离）
 
 ```
-python Calcuation_of_similarity_between_adjacent_frames.py
+python Calcuation_of_similarity_between_adjacent_frames.py --save_path /home/xplv/fenghao_2/test
 ```
 
 #### 2、指数法
 
 ```
-python Index_method_similarity_between_adjacent_frames.py
+python Index_method_similarity_between_adjacent_frames.py --save_path /home/xplv/fenghao_2/test
 ```
 
 ### 三、数据集分析
 
 1、图像分辨率分布图
-
-![img](https://w6k74z8wth.feishu.cn/space/api/box/stream/download/asynccode/?code=NjQxOWQ4NmZmZmE2YzYxNTNkNThmYjRiNDc2MWRiOTBfWFp0amZxTjNrYTdkc2Z0d0RINFdVQjFOSWc1Uk52M1BfVG9rZW46WmZMemJrRWxKbzZaQmZ4bHBoWmN3TU5sbnVmXzE3MjEzNzI2OTA6MTcyMTM3NjI5MF9WNA)
 
 ```
 python width_height_img.py
@@ -178,15 +225,11 @@ python width_height_img.py
 
 2、中心点坐标分布图
 
-![img](https://w6k74z8wth.feishu.cn/space/api/box/stream/download/asynccode/?code=YTYyN2E2MmU3ZDRkMmNlMjdhZWU5NTYzZjA5ODdhNTlfSVNzeWRLT0luNmZzV0VTR3liUVo4WUI4aEo1U2NqNjhfVG9rZW46T3RuRGI5WFlyb3A4RU94bURJWGNVajBMbm5nXzE3MjEzNzMwNDc6MTcyMTM3NjY0N19WNA)
-
 ```
 python center_coordinate.py
 ```
 
 3、矩形框概览
-
-![img](https://w6k74z8wth.feishu.cn/space/api/box/stream/download/asynccode/?code=YmVmMWEwN2RlODU4MzQ4NjRiNzc2NGExMWVhZGEyYzdfd3dvMmJBaGJpWEQ4N0FFMU5IMzN4VTlySW1NYXp0c3hfVG9rZW46R2xyMGJnYnNMb1lCR3V4TXUxZmNod1l4bkpkXzE3MjEzNzMxMzE6MTcyMTM3NjczMV9WNA)
 
 ```
 python Draw_rectangular_box.py

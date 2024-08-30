@@ -13,8 +13,10 @@ import matplotlib.pyplot as plt
 # Evaluate
 
 parser = argparse.ArgumentParser(description='Demo')
-parser.add_argument('--query_index', default=j, type=int, help='test_image_index')
+parser.add_argument('--query_index', default=True, type=int, help='test_image_index')
 parser.add_argument('--test_dir', default='../Market/pytorch', type=str, help='./test_data')
+parser.add_argument('--save_path', default='/home/xplv/fenghao/ResNet50_plt_savefig', type=str, help='save path')
+
 opts = parser.parse_args()
 
 data_dir = opts.test_dir
@@ -155,5 +157,5 @@ except RuntimeError:
         img_path = image_datasets.imgs[index[i]]
         print(img_path[0])
     print('If you want to see the visualization of the ranking result, graphical user interface is needed.')
-save_path = f'/home/xplv/fenghao/ResNet50_plt_savefig/{query_label:04d}.png'
+save_path = f'{opts.save_path}/{query_label:04d}.png'
 fig.savefig(save_path)

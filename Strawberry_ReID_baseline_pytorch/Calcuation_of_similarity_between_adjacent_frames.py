@@ -49,7 +49,8 @@ store_path = []
 image_datasets = {x: datasets.ImageFolder(os.path.join('../Market/pytorch', x)) for x in ['gallery']}  # 具体是啥可以打印出来看看
 # print(len(image_datasets['gallery'].imgs))
 # print(image_datasets['gallery'].imgs[0])
-for n in range(0, 6918):  # gallery中共有6918张图像，根据文件名对6918张图像进行一个排序
+len_gallery = len(image_datasets['gallery'].imgs)
+for n in range(0, len_gallery):  # gallery中共有6918张图像，根据文件名对6918张图像进行一个排序
     path, _ = image_datasets['gallery'].imgs[n]
     store_path.append(path)
     print(path)
@@ -58,6 +59,7 @@ for j in range(0, 100):
     parser = argparse.ArgumentParser(description='Demo')
     parser.add_argument('--gallery1_index', default=j, type=int, help='test_image_index')
     parser.add_argument('--test_dir', default='../Market/pytorch', type=str, help='./test_data')
+    parser.add_argument('--save_path', default='/home/xplv/fenghao/ReID_project/modify_ResNet50_Adjacent_frame_similarity', type=str, help='save path')
     opts = parser.parse_args()
 
     # data_dir = opts.test_dir
@@ -112,6 +114,6 @@ for j in range(0, 100):
 
     else:  # 如果gallery1和gallery2这两个图像的ID是不一样的，则说明gallery1是上一个ID 的最后一帧，而gallery2是新ID的第一帧
         k = 1  # 重新初始化k=1
-        save_path = f'/home/xplv/fenghao/ReID_project/modify_ResNet50_Adjacent_frame_similarity/{gallery1_label:04d}.png'
+        save_path = f'{opts.save_path}/{gallery1_label:04d}.png'
         fig.savefig(save_path)  # 保存gallery1所在ID的图像相邻帧相似度
         fig = plt.figure(figsize=(16, 16))  # 且新生成一个图形容器,用于存放gallery2所在ID的图像相邻帧相似度
